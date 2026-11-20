@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Расчёт коэффициента готовности изделия KG при обеспечении ЗИП-Г по ГОСТ 27.507-2015</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #eef2f7; padding: 20px; color: #333; }
+h1 { text-align: center; font-size: 20px; margin-bottom: 4px; color: #1a237e; }
+.subtitle { text-align: center; font-size: 13px; color: #546e7a; margin-bottom: 18px; }
+h2 { font-size: 15px; margin: 18px 0 10px; background: #e3e8f7; padding: 8px 12px; border-radius: 4px; color: #1a237e; }
+.section { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; align-items: center; }
+.row label { min-width: 200px; font-weight: 500; font-size: 13px; }
+.row input, .row select { flex: 1; min-width: 120px; max-width: 180px; padding: 6px 10px; border: 1px solid #b0bec5; border-radius: 4px; font-size: 14px; }
+.row input:focus, .row select:focus { border-color: #3f51b5; outline: none; box-shadow: 0 0 0 2px rgba(63,81,181,.2); }
+.row .unit { font-size: 12px; color: #607d8b; min-width: 50px; }
+.hint { font-size: 11.5px; color: #607d8b; width: 100%; margin-left: 210px; font-style: italic; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+th, td { border: 1px solid #d7dde5; padding: 6px 8px; text-align: center; }
+th { background: #e3e8f7; font-weight: 600; font-size: 12px; }
+td input, td select { width: 100%; border: none; text-align: center; padding: 4px; font-size: 13px; background: transparent; }
+td input:focus, td select:focus { outline: 2px solid #3f51b5; border-radius: 2px; background: #fff; }
+td input.num { text-align: right; }
+.buttons { text-align: center; margin: 18px 0; }
+.buttons button { padding: 10px 26px; font-size: 15px; border: none; border-radius: 6px; cursor: pointer; margin: 0 6px; font-weight: 600; }
+.btn-primary { background: #3f51b5; color: #fff; } .btn-primary:hover { background: #303f9f; }
+.btn-danger { background: #e53935; color: #fff; } .btn-danger:hover { background: #c62828; }
+.result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 10px 0; }
+.result-card { background: #f5f7fa; border-radius: 6px; padding: 14px; text-align: center; border-left: 5px solid #3f51b5; }
+.result-card .label { font-size: 12px; color: #546e7a; }
+.result-card .value { font-size: 22px; font-weight: 700; color: #1a237e; margin: 4px 0; }
+.result-card .note { font-size: 11px; color: #78909c; }
+.status { font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 10px; display: inline-block; }
+.status-ok { background: #c8e6c9; color: #2e7d32; }
+.status-fail { background: #ffcdd2; color: #c62828; }
+.highlight-green { background: #c8e6c9 !important; }
+.highlight-orange { background: #ffe0b2 !important; }
+.highlight-lambda { background: #e8f5e9; font-weight: 600; color: #1b5e20; }
+.strategy-note { background: #fff8e1; border-left: 4px solid #ffa000; padding: 8px 12px; font-size: 12.5px; border-radius: 0 4px 4px 0; margin: 6px 0; }
+.buttons-final { text-align: center; margin: 24px 0 30px; }
+.buttons-final button { padding: 12px 30px; font-size: 15px; border: none; border-radius: 6px; cursor: pointer; margin: 0 10px; font-weight: 700; letter-spacing: .5px; }
+.btn-save { background: #2e7d32; color: #fff; } .btn-save:hover { background: #1b5e20; }
+.btn-print { background: #1565c0; color: #fff; } .btn-print:hover { background: #0d47a1; }
+.overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; }
+.overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 10px; padding: 24px 28px; max-width: 460px; width: 92%; box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+.modal h3 { margin-bottom: 12px; color: #1a237e; font-size: 17px; }
+.modal .opt { display: block; padding: 10px 12px; border: 2px solid #cfd8dc; border-radius: 8px; margin-bottom: 8px; cursor: pointer; font-size: 14px; }
+.modal .opt:hover { border-color: #3f51b5; background: #e8eaf6; }
+.modal .opt input { margin-right: 8px; }
+.modal .note { font-size: 12px; color: #546e7a; margin: 10px 0; line-height: 1.5; }
+.modal .actions { text-align: right; margin-top: 14px; }
+.modal .actions button { padding: 9px 22px; font-size: 14px; border: none; border-radius: 5px; cursor: pointer; margin-left: 8px; font-weight: 600; }
+.btn-ok { background: #2e7d32; color: #fff; } .btn-ok:hover { background: #1b5e20; }
+.btn-cancel { background: #bdbdbd; color: #fff; } .btn-cancel:hover { background: #9e9e9e; }
+@media print { body { background:#fff; padding:10px; } .buttons { display:none; } .buttons-final { display:none; } }
+@media (max-width:768px) { .row label { min-width: 130px; } .hint { margin-left: 0; } }
+</style>
+</head>
+<body>
+
+<h1>Расчёт коэффициента готовности изделия K<sub>G</sub> при обеспечении групповым комплектом ЗИП-Г</h1>
+<div class="subtitle">Методика расчёта — ГОСТ 27.507-2015 «Надёжность в технике. Запасные части, инструменты и принадлежности»</div>
+
+<div class="section">
+<h2>1. Исходные данные</h2>
+<div class="row">
+    <label>1.1 N — количество обслуживаемых изделий:</label>
+    <input type="number" id="paramN" value="10" min="1" step="1" onchange="document.getElementById('hintN').style.display=this.value&&Number(this.value)>=1?'none':'block'">
+    <span class="unit">шт.</span>
+    <div class="hint" id="hintN">(N — объём партии изделий, одновременно обеспечиваемых групповым комплектом ЗИП-Г, шт.)</div>
+</div>
+<div class="row">
+    <label>1.2 ε — точность расчёта:</label>
+    <input type="number" id="paramEps" value="0.0001" min="0" step="any">
+    <span class="unit"></span>
+    <div class="hint">(ε — допустимая погрешность вычислений при суммировании бесконечных рядов распределения Пуассона, безразмерная; рекомендуется 0,001 или 0,0001)</div>
+</div>
+<div class="row">
+    <label>1.3 KG* — заданный (требуемый) коэффициент готовности изделия:</label>
+    <input type="number" id="paramKG" value="0.95" min="0" max="1" step="any">
+    <span class="unit"></span>
+    <div class="hint">(KG* — первоначально заданное вручную значение коэффициента готовности изделия, которое должно быть обеспечено комплектом ЗИП-Г, безразмерная; сравнивается с расчётным значением KG)</div>
+</div>
+
+<h2>2. Параметры типов запасных частей (ЗЧ)</h2>
+<div style="overflow-x:auto">
+<table id="zchTable">
+<thead><tr>
+<th>№</th>
+<th>Тип ЗЧ (наименование/код)</th>
+<th>m<sub>i</sub> (шт.)</th>
+<th>n<sub>i</sub> (шт.)</th>
+<th>Средняя наработка на отказ T<sub>ср,i</sub> (ч)</th>
+<th>λ<sub>i</sub> (1/ч, расч.)</th>
+<th>σ<sub>i</sub> (индекс 1, 2, 3)</th>
+<th>τ<sub>i</sub> (ч)</th>
+<th>C<sub>i</sub> (руб.)</th>
+</tr></thead>
+<tbody id="zchBody"></tbody>
+</table>
+</div>
+<div style="font-size:12px; color:#546e7a; margin-top:8px">
+<b>Расшифровка параметров по ГОСТ 27.507-2015:</b><br>
+• m<sub>i</sub> (шт.) — количество единиц ЗЧ i-го типа в одном изделии (≥1)<br>
+• n<sub>i</sub> (шт.) — начальный уровень запаса ЗЧ i-го типа (число ЗЧ этого типа, находящихся в комплекте ЗИП-Г), целое ≥0<br>
+• T<sub>ср,i</sub> (ч) — средняя наработка на отказ СЧ i-го типа (средняя наработка между отказами, MTBF) (>0)<br>
+• λ<sub>i</sub> (1/ч, расч.) — средняя интенсивность отказов СЧ i-го типа: λ<sub>i</sub> = 1 / T<sub>ср,i</sub> (>0). Согласно п. 8.5 ГОСТ 27.507-2015 величина λ<sub>i</sub>, вносимая в таблицу исходных данных, определяется как сумма интенсивностей замен СЧ i-го типа из-за отказов их в различных режимах работы изделий, профилактических замен при техническом обслуживании, а также из-за отказов ЗЧ при хранении их в комплекте ЗИП; при экспоненциальном законе распределения наработки интенсивность отказов связана со средней наработкой на отказ соотношением λ<sub>i</sub> = 1/T<sub>ср,i</sub><br>
+• σ<sub>i</sub> (индекс стратегии, безразмерный) — стратегия пополнения запаса ЗЧ i-го типа: 1, 2 или 3<br>
+• τ<sub>i</sub> (ч) — параметр стратегии пополнения (среднее время пополнения запаса): для стратегий 1 и 2 — τ<sub>1</sub> (период планового пополнения, п. 7.2 ГОСТ), для стратегии 3 — τ<sub>1</sub> (время доставки (ремонта) ЗЧ, п. 7.2 ГОСТ)<br>
+• C<sub>i</sub> (руб.) — стоимость единицы ЗЧ i-го типа (затраты на приобретение одной запасной части)
+</div>
+<div class="strategy-note" id="stratNote"><b>Описание стратегий пополнения по ГОСТ 27.507-2015 (п. 7.1, 7.2, 7.3):</b><br>
+<b>Стратегия 1 — периодическое пополнение</b> (условный индекс 1).<br>
+<i>Соответствие из ГОСТ</i> (п. 7.1): «периодическое пополнение (условный индекс 1)». Параметры (п. 7.2): «при j = 1: τ<sub>1</sub> — период планового пополнения j-запаса, τ<sub>2</sub> — параметр не используется (0)». Сущность (п. 7.3.1): «Стратегию периодического пополнения, предусматривающую, что пополнение запасов производится с плановой периодичностью, следует применять для запасов невосстанавливаемых СЧ с относительно малой интенсивностью спроса на них и небольшими затратами (стоимостью, весом)».<br>
+<i>Формула из ГОСТ</i> (п. 9.2.3, формула (9.12) — «при периодическом пополнении (1)»): a<sub>i</sub> = μ<sub>iГ</sub>·τ<sub>1</sub> (формула (9.9), п. 9.2.2); q<sub>i</sub> = Σ<sub>k=n<sub>i</sub>+1</sub><sup>∞</sup> (k − n<sub>i</sub>)·P(k, a<sub>i</sub>). Принимается τ<sub>i</sub> = τ<sub>1</sub> — период планового пополнения.<br>
+<b>Стратегия 2 — периодическое пополнение с экстренными доставками</b> (условный индекс 2).<br>
+<i>Соответствие из ГОСТ</i> (п. 7.1): «периодическое пополнение с экстренными доставками (2)». Параметры (п. 7.2): «при j = 2: τ<sub>1</sub> — период планового пополнения j-запаса, τ<sub>2</sub> — время экстренной доставки ЗЧ j-типа». Сущность (п. 7.3.2): «Стратегия периодического пополнения с экстренными доставками предусматривает, что кроме планового пополнения запаса с периодичностью τ<sub>1</sub> в случае отказа комплекта ЗИП по j-запасу может быть осуществлено экстренное пополнение за время τ<sub>2</sub>». Эту стратегию рекомендуется применять для запасов крупногабаритных, дорогих и относительно ненадёжных СЧ.<br>
+<i>Формула из ГОСТ</i> (п. 9.2.3, формула (9.13) — «при периодическом пополнении с экстренными доставками (2)»). В калькуляторе задаётся τ<sub>i</sub> = τ<sub>1</sub> — период планового пополнения (время экстренной доставки τ<sub>2</sub> не задаётся).<br>
+<b>Стратегия 3 — непрерывное пополнение</b> (условный индекс 3).<br>
+<i>Соответствие из ГОСТ</i> (п. 7.1): «непрерывное пополнение (3)». Параметры (п. 7.2): «при j = 3: τ<sub>1</sub> — время доставки (ремонта) ЗЧ j-типа, τ<sub>2</sub> — параметр не используется (0)». Сущность (п. 7.3.3): «Стратегию непрерывного пополнения применяют для запасов восстанавливаемых СЧ, которые либо обмениваются в ЗИП более высокого уровня, либо восстанавливаются в ремонтном органе и возвращаются в тот комплект ЗИП, из которого были изъяты. ... заявка на пополнение формируется по каждой отказавшей СЧ отдельно, а время доставки (ремонта) отсчитывается от момента изъятия из комплекта ЗИП (отказа СЧ в изделии)».<br>
+<i>Формула из ГОСТ</i> (п. 9.2.3, формула (9.14) — «при непрерывном пополнении (3)»): a<sub>i</sub> = μ<sub>iГ</sub>·τ<sub>1</sub> (формула (9.9), п. 9.2.2); q<sub>i</sub> = Σ<sub>k=n<sub>i</sub>+1</sub><sup>∞</sup> (k − n<sub>i</sub>)·P(k, a<sub>i</sub>). Принимается τ<sub>i</sub> = τ<sub>1</sub> — время доставки (ремонта) ЗЧ.<br>
+<b>Примечание.</b> Стратегия 4 — пополнение по уровню неснижаемого запаса (п. 7.1, 7.3.4) используется только в комплектах ЗИП-О; в моделях оценки и расчёта ЗИП-Г (п. 7.3.4) она не предусмотрена, поэтому в калькуляторе не приводится.
+</div>
+<div style="margin-top:8px">
+<button class="btn-primary" style="padding:6px 16px; font-size:13px" onclick="addRow()">+ Добавить тип ЗЧ</button>
+<button class="btn-primary" style="padding:6px 16px; font-size:13px; background:#f57c00" onclick="removeRow()">− Удалить последний</button>
+</div>
+</div>
+
+<div class="buttons">
+<button class="btn-primary" onclick="calculate()">Выполнить расчёт K<sub>G</sub></button>
+<button class="btn-danger" onclick="clearResults()">Очистить результаты</button>
+</div>
+
+<div class="section" id="resultsSection" style="display:none">
+<h2>3. Результаты расчёта</h2>
+<div class="result-grid" id="resultCards"></div>
+<div style="font-size:12px; color:#546e7a; margin-top:10px">
+<b>Расшифровка выходных показателей по ГОСТ 27.507-2015:</b><br>
+• μ<sub>iG</sub> — интенсивность спроса на ЗЧ i-го типа в группе изделий: μ<sub>iG</sub> = N·m<sub>i</sub>·λ<sub>i</sub>, 1/ч<br>
+• a<sub>i</sub> — нагрузка на ЗИП: среднее число расходуемых ЗЧ i-го типа за время τ<sub>i</sub>: a<sub>i</sub> = μ<sub>iG</sub>·τ<sub>i</sub><br>
+• q<sub>i</sub> — показатель недостаточности ЗЧ i-го типа: математическое ожидание числа дефицитных ЗЧ (не обеспеченных комплектом) в момент произвольной проверки<br>
+• Q<sub>G</sub> — суммарный показатель недостаточности группового комплекта ЗИП: Q<sub>G</sub> = Σq<sub>i</sub><br>
+• Λ<sub>G</sub> — суммарная интенсивность спроса на ЗИП-Г: Λ<sub>G</sub> = Σμ<sub>iG</sub>, 1/ч<br>
+• T<sub>G</sub> — среднее время задержки обеспечения ЗИП-Г (среднее время ожидания ЗЧ при отказе): T<sub>G</sub> = Q<sub>G</sub>/Λ<sub>G</sub>, ч<br>
+• K<sub>G</sub> — коэффициент готовности изделия при обеспечении групповым комплектом ЗИП-Г: K<sub>G</sub> = exp(−Q<sub>G</sub>/N)<br>
+• C<sub>G</sub> — стоимость комплекта ЗИП-Г (суммарные затраты на начальный уровень запаса): C<sub>G</sub> = ΣC<sub>i</sub>·n<sub>i</sub>, руб.
+</div>
+</div>
+
+<div class="section" id="calcSection" style="display:none">
+<h2>4. Промежуточные расчёты</h2>
+<div style="overflow-x:auto">
+<table id="calcTable"><thead><tr>
+<th>№</th><th>Тип ЗЧ</th><th>μ<sub>iG</sub></th><th>σ<sub>i</sub></th><th>τ<sub>i</sub></th><th>a<sub>i</sub></th><th>n<sub>i</sub></th><th>q<sub>i</sub></th><th>C<sub>i</sub>·n<sub>i</sub></th>
+</tr></thead><tbody id="calcBody"></tbody></table>
+</div>
+</div>
+
+<div class="section">
+<h2>5. Справочные формулы (ГОСТ 27.507-2015)</h2>
+<div style="font-size:13px; line-height:1.9">
+1. Интенсивность спроса на ЗЧ i-го типа в группе изделий: <b>μ<sub>iG</sub> = N · m<sub>i</sub> · λ<sub>i</sub></b> (п. 6.1.1.1; для ЗИП-Г — формула (8.2))<br>
+2. Суммарная интенсивность спроса на ЗИП-Г: <b>Λ<sub>G</sub> = Σ μ<sub>iG</sub></b> (формула (9.11), п. 9.2.3)<br>
+3. Среднее число заявок на ЗЧ i-го типа за период пополнения (время доставки, ремонта): <b>a<sub>i</sub> = μ<sub>iG</sub> · τ<sub>i</sub></b> (формула (9.9), п. 9.2.2)<br>
+4. Показатель недостаточности ЗЧ i-го типа (по распределению Пуассона), п. 9.2.3:<br>
+&nbsp;&nbsp;— стратегия 1 (периодическое пополнение): <b>q<sub>i</sub> = Σ<sub>k=n<sub>i</sub>+1</sub><sup>∞</sup> (k − n<sub>i</sub>) · P(k, a<sub>i</sub>)</b>, формула <b>(9.12)</b>, при τ<sub>i</sub> = τ<sub>1</sub>;<br>
+&nbsp;&nbsp;— стратегия 2 (периодическое пополнение с экстренными доставками): формула <b>(9.13)</b>, при τ<sub>i</sub> = τ<sub>1</sub> (τ<sub>2</sub> — время экстренной доставки — не задаётся);<br>
+&nbsp;&nbsp;— стратегия 3 (непрерывное пополнение): <b>q<sub>i</sub> = Σ<sub>k=n<sub>i</sub>+1</sub><sup>∞</sup> (k − n<sub>i</sub>) · P(k, a<sub>i</sub>)</b>, формула <b>(9.14)</b>, при τ<sub>i</sub> = τ<sub>1</sub> (время доставки (ремонта) ЗЧ);<br>
+&nbsp;&nbsp;где <b>P(k, a) = e<sup>−a</sup> · a<sup>k</sup> / k!</b> — распределение Пуассона.<br>
+5. Суммарный показатель недостаточности комплекта ЗИП-Г: <b>Q<sub>G</sub> = Σ q<sub>i</sub></b><br>
+6. Среднее время задержки в удовлетворении заявок на ЗЧ комплектом ЗИП-Г: <b>T<sub>G</sub> = Q<sub>G</sub> / Λ<sub>G</sub></b> (формула (6.10), п. 6.1.2.1)<br>
+7. Коэффициент готовности изделия при обеспечении групповым комплектом ЗИП-Г: <b>K<sub>G</sub> = exp(−Q<sub>G</sub> / N)</b> (п. 6.1.2.2; формула (6.12) — поправка к коэффициенту готовности одного изделия)<br>
+8. Стоимость комплекта ЗИП-Г (суммарные затраты на ЗЧ): <b>C<sub>G</sub> = Σ C<sub>i</sub> · n<sub>i</sub></b> (формула (6.14), п. 6.2.1)
+</div>
+</div>
+
+<div class="section" id="recSection">
+<h2>6. Рекомендации по достижению требуемого значения KG (по ГОСТ 27.507-2015)</h2>
+<div id="recBody">Выполните расчёт (кнопка «Выполнить расчёт K<sub>G</sub>»), после чего здесь появятся рекомендации по достижению условия KG ≥ KG*.</div>
+</div>
+
+<div class="buttons-final">
+<button class="btn-save" onclick="saveReport()">СОХРАНИТЬ РАСЧЁТ</button>
+<button class="btn-print" onclick="openPrintModal()">ПЕЧАТЬ РАСЧЁТА</button>
+</div>
+
+<div class="overlay" id="printOverlay">
+<div class="modal">
+<h3>Печать расчёта</h3>
+<label class="opt"><input type="radio" name="fmt" value="pdf" checked> PDF (откроется диалог печати браузера: выберите принтер или «Сохранить как PDF»)</label>
+<label class="opt"><input type="radio" name="fmt" value="xls"> XLS (файл Excel: сохранится для последующей печати из Microsoft Excel)</label>
+<label class="opt"><input type="radio" name="fmt" value="rtf"> RTF (файл Word: сохранится для последующей печати из Microsoft Word)</label>
+<div class="note" id="printNote"></div>
+<div class="actions">
+<button class="btn-cancel" onclick="closePrintModal()">Отмена</button>
+<button class="btn-ok" onclick="doPrint()">Печать</button>
+</div>
+</div>
+</div>
+
+<script>
+// Факториал с мемоизацией
+const fact = (function(){ const c=[1]; return function f(n){ if(n<0) return 1; if(c[n]!==undefined) return c[n]; return c[n]=n*f(n-1); }; })();
+
+// Распределение Пуассона: P(k, a) = e^{-a} * a^k / k!
+function poissonPDF(k, a) {
+    if (a === 0) return k === 0 ? 1 : 0;
+    return Math.exp(-a) * Math.pow(a, k) / fact(k);
+}
+
+// Показатель недостаточности q_i = sum_{k=n_i+1}^{inf} (k-n_i) * P(k, a_i)
+function calcQi(ai, ni, eps) {
+    if (ai === 0) return 0;
+    let s = 0, prev, k = ni + 1;
+    do {
+        prev = s;
+        s += (k - ni) * poissonPDF(k, ai);
+        k++;
+        if (k > 10000) break;
+    } while (s - prev > eps);
+    return s;
+}
+
+let zchData = [];
+
+function getDefaultData() {
+    return [
+        { name: 'Блок питания', mi: 2, ni: 2, tMean: 20000, sigma: 3, tau: 500, ci: 25000 },
+        { name: 'Модуль управления', mi: 1, ni: 3, tMean: 10000, sigma: 3, tau: 1000, ci: 45000 },
+        { name: 'Датчик', mi: 4, ni: 1, tMean: 50000, sigma: 1, tau: 8760, ci: 8000 },
+        { name: 'Кабель', mi: 3, ni: 1, tMean: 100000, sigma: 2, tau: 8760, ci: 3000 },
+        { name: 'Вентилятор', mi: 2, ni: 4, tMean: 5000, sigma: 3, tau: 2000, ci: 5000 }
+    ];
+}
+
+function lambdaOf(d) {
+    return 1 / d.tMean;
+}
+
+function renderTable() {
+    const tb = document.getElementById('zchBody');
+    tb.innerHTML = '';
+    for (let i = 0; i < zchData.length; i++) {
+        const d = zchData[i];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td>
+<td><input type="text" value="${d.name}" onchange="zchData[${i}].name=this.value" title="Тип ЗЧ (наименование/код)"></td>
+<td><input class="num" type="number" value="${d.mi}" min="1" step="1" onchange="zchData[${i}].mi=Number(this.value)" title="m_i — количество единиц ЗЧ i-го типа в одном изделии, шт. (≥1)"></td>
+<td><input class="num" type="number" value="${d.ni}" min="0" step="1" onchange="zchData[${i}].ni=Number(this.value)" title="n_i — начальный уровень запаса ЗЧ i-го типа (число ЗЧ в комплекте ЗИП-Г), целое ≥0"></td>
+<td><input class="num" type="number" value="${d.tMean}" min="0" step="any" onchange="zchData[${i}].tMean=Number(this.value); updateLambda(${i})" title="T_ср,i — средняя наработка на отказ СЧ i-го типа (средняя наработка между отказами), ч (>0)"></td>
+<td class="highlight-lambda"><b>${lambdaOf(d).toExponential(3)}</b></td>
+<td><select onchange="zchData[${i}].sigma=Number(this.value); updateStratNote()" title="σ_i — стратегия пополнения запаса ЗЧ: 1, 2 или 3">
+<option value="1"${d.sigma===1?' selected':''}>1</option>
+<option value="2"${d.sigma===2?' selected':''}>2</option>
+<option value="3"${d.sigma===3?' selected':''}>3</option>
+</select></td>
+<td><input class="num" type="number" value="${d.tau}" min="0" step="any" onchange="zchData[${i}].tau=Number(this.value)" title="τ_i — параметр стратегии пополнения (среднее время пополнения запаса ЗЧ i-го типа), ч"></td>
+<td><input class="num" type="number" value="${d.ci}" min="0" step="any" onchange="zchData[${i}].ci=Number(this.value)" title="C_i — стоимость единицы ЗЧ, руб."></td>`;
+        tb.appendChild(tr);
+    }
+}
+
+function updateLambda(i) {
+    const cells = document.getElementById('zchBody').rows[i].cells;
+    cells[5].innerHTML = '<b>' + lambdaOf(zchData[i]).toExponential(3) + '</b>';
+}
+
+function updateStratNote() {
+    const s = zchData.length ? zchData[0].sigma : 3;
+    const note = document.getElementById('stratNote');
+    let txt = '<b>Описание стратегий пополнения по ГОСТ 27.507-2015 (п. 7.1, 7.2, 7.3):</b><br>';
+    txt += '<b>Стратегия 1 — периодическое пополнение</b> (условный индекс 1).<br>';
+    txt += '<i>Соответствие из ГОСТ</i> (п. 7.1): «периодическое пополнение (условный индекс 1)». Параметры (п. 7.2): «при j = 1: τ<sub>1</sub> — период планового пополнения j-запаса, τ<sub>2</sub> — параметр не используется (0)». Сущность (п. 7.3.1): «Стратегию периодического пополнения, предусматривающую, что пополнение запасов производится с плановой периодичностью, следует применять для запасов невосстанавливаемых СЧ с относительно малой интенсивностью спроса на них и небольшими затратами (стоимостью, весом)».<br>';
+    txt += '<i>Формула из ГОСТ</i> (п. 9.2.3, формула (9.12) — «при периодическом пополнении (1)»): a<sub>i</sub> = μ<sub>iГ</sub>·τ<sub>1</sub> (формула (9.9), п. 9.2.2); q<sub>i</sub> = Σ<sub>k=n<sub>i</sub>+1</sub><sup>∞</sup> (k − n<sub>i</sub>)·P(k, a<sub>i</sub>). Принимается τ<sub>i</sub> = τ<sub>1</sub> — период планового пополнения.<br>';
+    txt += '<b>Стратегия 2 — периодическое пополнение с экстренными доставками</b> (условный индекс 2).<br>';
+    txt += '<i>Соответствие из ГОСТ</i> (п. 7.1): «периодическое пополнение с экстренными доставками (2)». Параметры (п. 7.2): «при j = 2: τ<sub>1</sub> — период планового пополнения j-запаса, τ<sub>2</sub> — время экстренной доставки ЗЧ j-типа». Сущность (п. 7.3.2): «Стратегия периодического пополнения с экстренными доставками предусматривает, что кроме планового пополнения запаса с периодичностью τ<sub>1</sub> в случае отказа комплекта ЗИП по j-запасу может быть осуществлено экстренное пополнение за время τ<sub>2</sub>». Эту стратегию рекомендуется применять для запасов крупногабаритных, дорогих и относительно ненадёжных СЧ.<br>';
+    txt += '<i>Формула из ГОСТ</i> (п. 9.2.3, формула (9.13) — «при периодическом пополнении с экстренными доставками (2)»). В калькуляторе задаётся τ<sub>i</sub> = τ<sub>1</sub> — период планового пополнения (время экстренной доставки τ<sub>2</sub> не задаётся).<br>';
+    txt += '<b>Стратегия 3 — непрерывное пополнение</b> (условный индекс 3).<br>';
+    txt += '<i>Соответствие из ГОСТ</i> (п. 7.1): «непрерывное пополнение (3)». Параметры (п. 7.2): «при j = 3: τ<sub>1</sub> — время доставки (ремонта) ЗЧ j-типа, τ<sub>2</sub> — параметр не используется (0)». Сущность (п. 7.3.3): «Стратегию непрерывного пополнения применяют для запасов восстанавливаемых СЧ, которые либо обмениваются в ЗИП более высокого уровня, либо восстанавливаются в ремонтном органе и возвращаются в тот комплект ЗИП, из которого были изъяты. ... заявка на пополнение формируется по каждой отказавшей СЧ отдельно, а время доставки (ремонта) отсчитывается от момента изъятия из комплекта ЗИП (отказа СЧ в изделии)».<br>';
+    txt += '<i>Формула из ГОСТ</i> (п. 9.2.3, формула (9.14) — «при непрерывном пополнении (3)»): a<sub>i</sub> = μ<sub>iГ</sub>·τ<sub>1</sub> (формула (9.9), п. 9.2.2); q<sub>i</sub> = Σ<sub>k=n<sub>i</sub>+1</sub><sup>∞</sup> (k − n<sub>i</sub>)·P(k, a<sub>i</sub>). Принимается τ<sub>i</sub> = τ<sub>1</sub> — время доставки (ремонта) ЗЧ.<br>';
+    txt += '<b>Примечание.</b> Стратегия 4 — пополнение по уровню неснижаемого запаса (п. 7.1, 7.3.4) используется только в комплектах ЗИП-О; в моделях оценки и расчёта ЗИП-Г (п. 7.3.4) она не предусмотрена, поэтому в калькуляторе не приводится.';
+    if (s === 1) txt += '<br><b>Выбрана стратегия 1:</b> τ<sub>i</sub> = τ<sub>1</sub> — период планового пополнения запаса, ч (п. 7.2 ГОСТ); расчёт по формуле (9.12).';
+    if (s === 2) txt += '<br><b>Выбрана стратегия 2:</b> τ<sub>i</sub> = τ<sub>1</sub> — период планового пополнения запаса, ч (п. 7.2 ГОСТ); расчёт по формуле (9.13).';
+    if (s === 3) txt += '<br><b>Выбрана стратегия 3:</b> τ<sub>i</sub> = τ<sub>1</sub> — время доставки (ремонта) ЗЧ, ч (п. 7.2 ГОСТ); расчёт по формуле (9.14).';
+    note.innerHTML = txt;
+}
+
+function addRow() {
+    zchData.push({ name: 'Новый тип ЗЧ', mi: 1, ni: 1, tMean: 10000, sigma: 3, tau: 500, ci: 10000 });
+    renderTable(); updateStratNote();
+}
+function removeRow() {
+    if (zchData.length > 1) { zchData.pop(); renderTable(); updateStratNote(); }
+}
+
+function doCalc(data, N, eps) {
+    const results = [];
+    let totalLambda = 0, totalQG = 0, totalCG = 0;
+    for (const d of data) {
+        const mu = N * d.mi * lambdaOf(d);              // интенсивность спроса
+        const ai = mu * d.tau;                        // нагрузка на ЗИП
+        const qi = calcQi(ai, d.ni, eps);             // показатель недостаточности
+        totalLambda += mu; totalQG += qi; totalCG += d.ci * d.ni;
+        results.push({ name: d.name, mu, sigma: d.sigma, tau: d.tau, ai, ni: d.ni, qi });
+    }
+    const TG = totalLambda > 0 ? totalQG / totalLambda : 0;
+    const KG = Math.exp(-totalQG / N);
+    return { results, totalLambda, totalQG, totalCG, TG, KG };
+}
+
+function calculate() {
+    const N = parseFloat(document.getElementById('paramN').value);
+    const eps = parseFloat(document.getElementById('paramEps').value) || 1e-4;
+
+    // Валидация входных данных
+    if (!N || N < 1) { alert('Ошибка: N (количество обслуживаемых изделий) должно быть целым числом ≥ 1'); return; }
+    if (eps <= 0) { alert('Ошибка: ε (точность расчёта) должна быть > 0'); return; }
+    for (let i = 0; i < zchData.length; i++) {
+        const d = zchData[i];
+        if (!d.name.trim()) { alert(`Ошибка в строке ${i+1}: не указан тип ЗЧ (наименование/код)`); return; }
+        if (d.mi < 1) { alert(`Ошибка в строке ${i+1}: m_i (количество ЗЧ в изделии) должно быть ≥ 1`); return; }
+        if (d.ni < 0 || !Number.isInteger(d.ni)) { alert(`Ошибка в строке ${i+1}: n_i (начальный уровень запаса) должно быть целым числом ≥ 0`); return; }
+        if (d.tMean <= 0) { alert(`Ошибка в строке ${i+1}: T_ср,i (средняя наработка на отказ) должна быть > 0`); return; }
+        if (d.sigma < 1 || d.sigma > 3) { alert(`Ошибка в строке ${i+1}: σ_i (стратегия пополнения) должна быть 1, 2 или 3`); return; }
+        if (d.tau < 0) { alert(`Ошибка в строке ${i+1}: τ_i (параметр стратегии) должно быть ≥ 0`); return; }
+        if (d.ci < 0) { alert(`Ошибка в строке ${i+1}: C_i (стоимость единицы ЗЧ) должна быть ≥ 0`); return; }
+    }
+
+    const r = doCalc(zchData, N, eps);
+
+    // Заданный KG* и сравнение с расчётным KG
+    const kgStar = parseFloat(document.getElementById('paramKG').value);
+    if (!kgStar || kgStar <= 0 || kgStar >= 1) { alert('Ошибка: KG* (заданный коэффициент готовности изделия) должен быть в диапазоне 0 < KG* < 1'); return; }
+    const kg = r.KG;
+    let kgColor, kgBg, kgText;
+    if (kg < 0.90) { kgColor = '#c62828'; kgBg = '#ffcdd2'; kgText = 'KG < 0,90 — низкий уровень готовности (красный)'; }
+    else if (kg < 0.95) { kgColor = '#f9a825'; kgBg = '#fff9c4'; kgText = 'KG в диапазоне 0,90–0,95 — средний уровень готовности (жёлтый)'; }
+    else { kgColor = '#2e7d32'; kgBg = '#c8e6c9'; kgText = 'KG ≥ 0,95 — высокий уровень готовности (зелёный)'; }
+    const kgOk = kg >= kgStar;
+    const kgStatus = kgOk ? '<span class="status status-ok">Требование KG ≥ KG* выполняется</span>' : '<span class="status status-fail">Требование KG ≥ KG* НЕ выполняется</span>';
+
+    // Карточки результатов
+    const rs = document.getElementById('resultCards');
+    rs.innerHTML = `
+<div class="result-card" style="border-left-color:${kgColor}; background:${kgBg}"><div class="label">K<sub>G</sub> — коэффициент готовности изделия при обеспечении ЗИП-Г (расчётный)</div><div class="value" style="color:${kgColor}">${kg.toFixed(8)}</div><div class="note">K<sub>G</sub> = exp(−Q<sub>G</sub>/N) — формула (6.12) ГОСТ 27.507-2015. ${kgText}</div><div style="margin-top:6px">${kgStatus}</div></div>
+<div class="result-card" style="border-left-color:#1a237e"><div class="label">KG* — заданный (требуемый) коэффициент готовности изделия</div><div class="value">${kgStar.toFixed(4)}</div><div class="note">Заданное вручную значение, с которым сравнивается расчётный K<sub>G</sub>: ${kg >= kgStar ? 'K<sub>G</sub> ≥ KG*' : 'K<sub>G</sub> &lt; KG*'}</div></div>
+<div class="result-card" style="border-left-color:#f57c00"><div class="label">T<sub>G</sub> — среднее время задержки обеспечения ЗИП-Г</div><div class="value">${r.TG.toFixed(6)}</div><div class="note">T<sub>G</sub> = Q<sub>G</sub>/Λ<sub>G</sub> — формула (6.10) ГОСТ 27.507-2015, среднее время ожидания ЗЧ при отказе, ч</div></div>
+<div class="result-card"><div class="label">Q<sub>G</sub> — суммарный показатель недостаточности</div><div class="value">${r.totalQG.toFixed(6)}</div><div class="note">Q<sub>G</sub> = Σq<sub>i</sub> — математическое ожидание суммарного числа дефицитных ЗЧ комплекта</div></div>
+<div class="result-card"><div class="label">Λ<sub>G</sub> — суммарная интенсивность спроса</div><div class="value">${r.totalLambda.toFixed(6)}</div><div class="note">Λ<sub>G</sub> = Σμ<sub>iG</sub> — формула (9.11) ГОСТ 27.507-2015, 1/ч</div></div>
+<div class="result-card" style="border-left-color:#6d4c41"><div class="label">C<sub>G</sub> — стоимость комплекта ЗИП-Г</div><div class="value">${r.totalCG.toFixed(2)}</div><div class="note">C<sub>G</sub> = ΣC<sub>i</sub>·n<sub>i</sub> — формула (6.14) ГОСТ 27.507-2015, руб.</div></div>
+<div class="result-card" style="border-left-color:#37474f"><div class="label">Условное форматирование K<sub>G</sub></div><div class="value" style="font-size:14px; color:#37474f">KG &lt; 0,90 — красный; 0,90–0,95 — жёлтый; ≥ 0,95 — зелёный</div><div class="note">Окраска карточки K<sub>G</sub> определяется расчётным значением коэффициента готовности</div></div>`;
+    document.getElementById('resultsSection').style.display = 'block';
+
+    // Таблица промежуточных расчётов
+    const cb = document.getElementById('calcBody');
+    cb.innerHTML = '';
+    for (let i = 0; i < r.results.length; i++) {
+        const dr = r.results[i];
+        const qiColor = dr.qi < 0.001 ? 'highlight-green' : dr.qi < 0.1 ? '' : 'highlight-orange';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td><td style="text-align:left">${dr.name}</td>
+<td>${dr.mu.toFixed(6)}</td><td>${dr.sigma}</td><td>${dr.tau.toFixed(1)}</td>
+<td>${dr.ai.toFixed(6)}</td><td>${dr.ni}</td><td class="${qiColor}">${dr.qi.toFixed(6)}</td><td>${(zchData[i].ci*dr.ni).toFixed(2)}</td>`;
+        cb.appendChild(tr);
+    }
+    const tr = document.createElement('tr');
+    tr.style.fontWeight = 'bold';
+    tr.innerHTML = `<td colspan="2">Σ (суммарные показатели)</td><td>${r.totalLambda.toFixed(6)}</td><td></td><td></td><td></td><td></td><td>${r.totalQG.toFixed(6)}</td><td>${r.totalCG.toFixed(2)}</td>`;
+    cb.appendChild(tr);
+    document.getElementById('calcSection').style.display = 'block';
+
+    // Раздел 6: рекомендации
+    buildRecommendations(N, eps, kgStar, r);
+}
+
+function clearResults() {
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('calcSection').style.display = 'none';
+    document.getElementById('recBody').innerHTML = 'Выполните расчёт (кнопка «Выполнить расчёт K<sub>G</sub>»), после чего здесь появятся рекомендации по достижению условия KG ≥ KG*.';
+}
+
+// ================= Рекомендации (раздел 6) =================
+
+function qOfType(d, ni, N, eps) {
+    const lam = lambdaOf(d);
+    const ai = N * d.mi * lam * d.tau;
+    return calcQi(ai, ni, eps);
+}
+
+function kgFor(Ni, eps, data, overrides) {
+    let Q = 0;
+    data.forEach((d, i) => {
+        const ov = overrides && overrides[i] ? overrides[i] : null;
+        const tm = ov && ov.tMean ? ov.tMean : d.tMean;
+        const tau = ov && ov.tau ? ov.tau : d.tau;
+        const ni = ov && ov.ni ? ov.ni : d.ni;
+        const ai = Ni * d.mi * (1 / tm) * tau;
+        Q += calcQi(ai, ni, eps);
+    });
+    return Math.exp(-Q / Ni);
+}
+
+function buildRecommendations(N, eps, kgStar, r) {
+    const sec = document.getElementById('recSection');
+    const body = document.getElementById('recBody');
+    sec.style.display = 'block';
+
+    if (r.KG >= kgStar) {
+        body.innerHTML = `<div class="status status-ok" style="padding:8px 14px">Условие <b>KG ≥ KG*</b> выполняется: расчётный KG = ${r.KG.toFixed(8)} ≥ заданный KG* = ${kgStar.toFixed(4)}. Рекомендации не требуются.</div>`;
+        return;
+    }
+
+    // ---- 1. Основная рекомендация: увеличение n_i по алгоритму оптимизации ГОСТ (п. 10.2.2, отношение (10.3)) ----
+    const work = JSON.parse(JSON.stringify(zchData));
+    const addCounts = new Array(work.length).fill(0);
+    let kgCur = r.KG;
+    let steps = 0;
+    const MAXSTEPS = 300;
+    while (kgCur < kgStar && steps < MAXSTEPS) {
+        let best = -1, bestE = -Infinity, bestQcur = 0, bestQnext = 0;
+        for (let i = 0; i < work.length; i++) {
+            const qCur = qOfType(work[i], work[i].ni, N, eps);
+            const qNext = qOfType(work[i], work[i].ni + 1, N, eps);
+            const E = (qCur - qNext) / work[i].ci;
+            if (E > bestE) { bestE = E; best = i; bestQcur = qCur; bestQnext = qNext; }
+        }
+        if (best < 0 || bestE <= 0) break;
+        work[best].ni += 1;
+        addCounts[best] += 1;
+        kgCur = kgFor(N, eps, work, null);
+        steps++;
+    }
+
+    let html = `<div class="status status-fail" style="padding:8px 14px; margin-bottom:10px"><b>Условие KG ≥ KG* не выполняется:</b> расчётный KG = ${r.KG.toFixed(8)} &lt; заданный KG* = ${kgStar.toFixed(4)}. Для выполнения условия необходимо изменить параметры комплекта ЗИП-Г в разделе 2.</div>`;
+
+    if (kgCur >= kgStar) {
+        html += `<b>1. Основная рекомендация (увеличить начальный уровень запаса n<sub>i</sub>)</b> — по алгоритму оптимизации запасов ЗИП-Г ГОСТ 27.507-2015 (п. 10.2.2, прямая задача: на каждом шаге одну ЗЧ добавляют тому типу, для которого отношение (10.3) — снижение показателя недостаточности на единицу затрат — максимально). С учётом этого правила при текущих параметрах раздела 2 условие KG ≥ KG* будет обеспечено при следующих начальных уровнях запаса:<br><br>
+        <table><tr><th>№</th><th>Тип ЗЧ</th><th>n<sub>i</sub> (текущий)</th><th>n<sub>i</sub> (рекомендуемый)</th><th>Δ (добавить)</th><th>σ<sub>i</sub></th><th>Действие в разделе 2</th></tr>`;
+        for (let i = 0; i < zchData.length; i++) {
+            if (addCounts[i] > 0) {
+                html += `<tr><td>${i+1}</td><td style="text-align:left">${esc(zchData[i].name)}</td><td>${zchData[i].ni}</td><td>${zchData[i].ni + addCounts[i]}</td><td><b>+${addCounts[i]}</b></td><td>${zchData[i].sigma}</td><td style="text-align:left">Увеличить n<sub>i</sub> на ${addCounts[i]} ед. (с ${zchData[i].ni} до ${zchData[i].ni + addCounts[i]})</td></tr>`;
+            }
+        }
+        html += `</table><br>После изменения n<sub>i</sub> в разделе 2 нажмите «Выполнить расчёт K<sub>G</sub>»: ожидаемый KG = ${kgCur.toFixed(8)} ≥ KG* = ${kgStar.toFixed(4)}.`;
+    } else {
+        html += `<b>1. Увеличение начального уровня запаса n<sub>i</sub></b> (по алгоритму п. 10.2.2 ГОСТ) само по себе не обеспечивает требуемое значение KG даже при последовательном добавлении ЗЧ — дополнительно примените рекомендации п. 2–4 ниже.`;
+    }
+
+    // ---- 2-4. Альтернативные меры по позиции с наибольшим вкладом в Q_G ----
+    let worst = 0;
+    for (let i = 1; i < r.results.length; i++) if (r.results[i].qi > r.results[worst].qi) worst = i;
+    const dW = zchData[worst];
+
+    // 2. Повышение T_ср,i (снижение λ_i)
+    function findTMean() {
+        let hi = dW.tMean * 100;
+        let it = 0;
+        while (kgFor(N, eps, zchData, { [worst]: { tMean: hi } }) < kgStar && it < 80) { hi *= 10; it++; }
+        if (kgFor(N, eps, zchData, { [worst]: { tMean: hi } }) < kgStar) return null;
+        let lo = dW.tMean;
+        for (let k = 0; k < 100; k++) {
+            const mid = (lo + hi) / 2;
+            if (kgFor(N, eps, zchData, { [worst]: { tMean: mid } }) >= kgStar) hi = mid; else lo = mid;
+        }
+        return hi;
+    }
+    const tNew = findTMean();
+
+    // 3. Снижение τ_i
+    function findTauMax() {
+        if (dW.tau <= 0) return null;
+        let lo = 0, hi = dW.tau;
+        if (kgFor(N, eps, zchData, { [worst]: { tau: hi } }) >= kgStar) return dW.tau;
+        for (let k = 0; k < 100; k++) {
+            const mid = (lo + hi) / 2;
+            if (kgFor(N, eps, zchData, { [worst]: { tau: mid } }) >= kgStar) lo = mid; else hi = mid;
+        }
+        return lo;
+    }
+    const tauMax = findTauMax();
+
+    const stratNote2 = dW.sigma === 1 ? ' (для стратегии 1 — уменьшить период планового пополнения, п. 7.2 ГОСТ)' : dW.sigma === 3 ? ' (для стратегии 3 — сократить время доставки (ремонта) ЗЧ, п. 7.3.3 ГОСТ)' : ' (для стратегии 2 — уменьшить период планового пополнения, п. 7.2 ГОСТ)';
+
+    html += `<br><br><b>2. Мера по позиции «${esc(dW.name)}» (наибольший вклад в Q<sub>G</sub>: q<sub>i</sub> = ${r.results[worst].qi.toExponential(4)})</b><br>
+    Повысить надёжность СЧ: увеличить среднюю наработку на отказ T<sub>ср,i</sub> с ${dW.tMean} ч ` + (tNew ? `до ≈ ${Math.round(tNew)} ч (λ<sub>i</sub> снизится с ${lambdaOf(dW).toExponential(3)} до ≈ ${(1/tNew).toExponential(3)} 1/ч)` : '— требуемое значение не достижимо увеличением T<sub>ср,i</sub> в разумных пределах') + ` — данные о надёжности СЧ определяют по результатам испытаний или эксплуатации аналогов (п. 8.5 ГОСТ 27.507-2015).<br>
+    <b>3. Та же позиция:</b> уменьшить параметр стратегии τ<sub>i</sub> с ${dW.tau} ч ` + (tauMax !== null && tauMax < dW.tau ? `до ≈ ${tauMax.toFixed(1)} ч${stratNote2}` : '(уменьшение τ<sub>i</sub> уже не требуется, либо позиция уже имеет минимальное время)') + `.<br>
+    <b>4. Изменение стратегии пополнения (п. 7.3 ГОСТ):</b>`;
+    if (dW.sigma === 1) html += ' для позиции «' + esc(dW.name) + '» с периодическим пополнением (стратегия 1) целесообразно рассмотреть переход на непрерывное пополнение (стратегия 3, п. 7.3.3) или на стратегию 2 с экстренными доставками (п. 7.3.2) — при меньшем времени пополнения показатель недостаточности q<sub>i</sub> снижается.';
+    else if (dW.sigma === 3) html += ' для позиции «' + esc(dW.name) + '» (непрерывное пополнение) необходимо сократить время доставки (ремонта) ЗЧ τ<sub>i</sub> (п. 7.3.3 ГОСТ).';
+    else html += ' для позиции «' + esc(dW.name) + '» (периодическое пополнение с экстренными доставками) уменьшить период планового пополнения τ<sub>i</sub> (п. 7.2 ГОСТ).';
+
+    html += `<br><br><b>Примечание.</b> Рекомендации п. 2–4 относятся к позиции «${esc(dW.name)}» — позиции с наибольшим значением показателя недостаточности q<sub>i</sub>; при необходимости примените их и к остальным позициям с q<sub>i</sub> &gt; 0,001. Все изменения вносятся в разделе 2, после чего нажмите «Выполнить расчёт K<sub>G</sub>».`;
+    body.innerHTML = html;
+}
+
+function buildRecommendationsSafe() {
+    const N = parseFloat(document.getElementById('paramN').value) || 0;
+    const eps = parseFloat(document.getElementById('paramEps').value) || 1e-4;
+    const kgStar = parseFloat(document.getElementById('paramKG').value) || 0;
+    const r = doCalc(zchData, N, eps);
+    buildRecommendations(N, eps, kgStar, r);
+}
+
+// ================= Сохранение и печать расчёта =================
+
+function collectReport() {
+    const N = parseFloat(document.getElementById('paramN').value) || 0;
+    const eps = parseFloat(document.getElementById('paramEps').value) || 1e-4;
+    const kgStar = parseFloat(document.getElementById('paramKG').value) || 0;
+    const r = doCalc(zchData, N, eps);
+    return { N, eps, kgStar, r, data: zchData };
+}
+
+function buildReportHTML() {
+    const { N, eps, kgStar, r, data } = collectReport();
+    const rows = data.map((d, i) => {
+        const res = r.results[i];
+        return `<tr>
+<td>${i+1}</td><td>${esc(d.name)}</td><td>${d.mi}</td><td>${d.ni}</td>
+<td>${d.tMean}</td><td>${lambdaOf(d).toExponential(3)}</td><td>${d.sigma}</td><td>${d.tau}</td><td>${d.ci}</td>
+<td>${res.mu.toExponential(3)}</td><td>${res.ai.toExponential(3)}</td><td>${res.qi.toExponential(4)}</td><td>${(d.ci*d.ni).toFixed(2)}</td>
+</tr>`;
+    }).join('');
+    const kgStatus = r.KG >= kgStar ? 'выполняется (KG >= KG*)' : 'НЕ выполняется (KG < KG*)';
+    const kgCond = r.KG < 0.90 ? 'красный (KG < 0,90)' : r.KG < 0.95 ? 'жёлтый (0,90 <= KG < 0,95)' : 'зелёный (KG >= 0,95)';
+    return `<!DOCTYPE html>
+<html xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Расчёт KG ЗИП-Г по ГОСТ 27.507-2015</title>
+<style>
+body{font-family:Arial;font-size:11px}
+h1{font-size:14px;text-align:center}
+h2{font-size:12px;margin:14px 0 6px}
+table{border-collapse:collapse;width:100%;margin-top:6px}
+td,th{border:1px solid #888;padding:3px 5px;text-align:center;font-size:10px}
+th{background:#dce6f1;font-weight:bold}
+.lbl{font-weight:bold}
+</style>
+</head>
+<body>
+<h1>Расчёт коэффициента готовности изделия KG при обеспечении групповым комплектом ЗИП-Г<br>по ГОСТ 27.507-2015</h1>
+<h2>1. Исходные данные</h2>
+<table>
+<tr><td class="lbl">N — количество обслуживаемых изделий, шт.</td><td>${N}</td>
+<td class="lbl">ε — точность расчёта</td><td>${eps}</td>
+<td class="lbl">KG* — заданный коэффициент готовности изделия</td><td>${kgStar}</td></tr>
+</table>
+<h2>2. Параметры типов запасных частей (ЗЧ) и промежуточные расчёты</h2>
+<table>
+<tr><th>№</th><th>Тип ЗЧ</th><th>m_i, шт.</th><th>n_i, шт.</th><th>T_ср,i, ч</th><th>λ_i = 1/T_ср,i, 1/ч</th><th>σ_i</th><th>τ_i, ч</th><th>C_i, руб.</th><th>μ_iG = N·m_i·λ_i, 1/ч</th><th>a_i = μ_iG·τ_i</th><th>q_i</th><th>C_i·n_i, руб.</th></tr>
+${rows}
+</table>
+<h2>3. Результаты расчёта</h2>
+<table>
+<tr><td class="lbl">K_G — коэффициент готовности изделия при обеспечении ЗИП-Г (расчётный)</td><td>${r.KG.toFixed(8)}</td>
+<td class="lbl">KG* — заданный коэффициент готовности</td><td>${kgStar}</td>
+<td class="lbl">Сравнение KG с KG*</td><td>${kgStatus}</td></tr>
+<tr><td class="lbl">Условное форматирование K_G</td><td>${kgCond}</td>
+<td class="lbl">T_G — среднее время задержки обеспечения ЗИП-Г, ч</td><td>${r.TG.toFixed(6)}</td>
+<td class="lbl">Q_G — суммарный показатель недостаточности</td><td>${r.totalQG.toFixed(6)}</td></tr>
+<tr><td class="lbl">Λ_G — суммарная интенсивность спроса, 1/ч</td><td>${r.totalLambda.toFixed(6)}</td>
+<td class="lbl">C_G — стоимость комплекта ЗИП-Г, руб.</td><td>${r.totalCG.toFixed(2)}</td>
+<td class="lbl">Дата расчёта</td><td>${new Date().toLocaleString('ru-RU')}</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildRTF() {
+    const { N, eps, kgStar, r, data } = collectReport();
+    function ru(s) {
+        return String(s).split('').map(function(ch){
+            const c = ch.charCodeAt(0);
+            if (c < 128) return ch;
+            return '\\u' + c + '?';
+        }).join('');
+    }
+    let lines = [];
+    lines.push('{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Arial;}}\\f0\\fs20');
+    lines.push('\\pard\\qc\\b\\fs28 Расчёт коэффициента готовности изделия KG при обеспечении групповым комплектом ЗИП-Г\\par');
+    lines.push('\\b\\fs20 по ГОСТ 27.507-2015\\b0\\par\\pard\\fs20\\par');
+    lines.push('\\b 1. Исходные данные\\b0\\par');
+    lines.push('N (количество обслуживаемых изделий, шт.): ' + N + '\\line');
+    lines.push('ε (точность расчёта): ' + eps + '\\line');
+    lines.push('KG* (заданный коэффициент готовности изделия): ' + kgStar + '\\par');
+    lines.push('\\b 2. Параметры типов ЗЧ и промежуточные расчёты\\b0\\par');
+    lines.push('\\trowd\\trgaph80\\cellx3000\\cellx6000\\cellx9000\\cellx12000\\cellx15000\\cellx18000\\cellx21000');
+    const hdrs = ['№','Тип ЗЧ','m_i, шт.','n_i, шт.','T_ср,i, ч','λ_i, 1/ч','σ_i','τ_i, ч','C_i, руб.','μ_iG, 1/ч','a_i','q_i','C_i·n_i, руб.'];
+    lines.push(hdrs.map(h => '\\cellx0\\intbl ' + ru(h)).join('') + '\\intbl\\cell\\row');
+    data.forEach((d, i) => {
+        const res = r.results[i];
+        const cells = [String(i+1), d.name, d.mi, d.ni, d.tMean, lambdaOf(d).toExponential(3), d.sigma, d.tau, d.ci, res.mu.toExponential(3), res.ai.toExponential(3), res.qi.toExponential(4), (d.ci*d.ni).toFixed(2)];
+        lines.push(cells.map(c => '\\intbl ' + ru(c)).join('') + '\\intbl\\cell\\row');
+    });
+    lines.push('\\par \\b 3. Результаты расчёта\\b0\\par');
+    lines.push('K_G (коэффициент готовности изделия при обеспечении ЗИП-Г, расчётный): ' + r.KG.toFixed(8) + '\\line');
+    lines.push('KG* (заданный коэффициент готовности): ' + kgStar + '\\line');
+    lines.push('Сравнение KG с KG*: ' + (r.KG >= kgStar ? 'выполняется' : 'НЕ выполняется') + '\\line');
+    lines.push('T_G (среднее время задержки обеспечения ЗИП-Г, ч): ' + r.TG.toFixed(6) + '\\line');
+    lines.push('Q_G (суммарный показатель недостаточности): ' + r.totalQG.toFixed(6) + '\\line');
+    lines.push('Λ_G (суммарная интенсивность спроса, 1/ч): ' + r.totalLambda.toFixed(6) + '\\line');
+    lines.push('C_G (стоимость комплекта ЗИП-Г, руб.): ' + r.totalCG.toFixed(2) + '\\line');
+    lines.push('Дата расчёта: ' + ru(new Date().toLocaleString('ru-RU')) + '\\par');
+    lines.push('}');
+    return lines.join('\\par\n');
+}
+
+function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+}
+
+async function saveWithDialog(blob, suggestedName) {
+    if (window.showSaveFilePicker) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: suggestedName,
+                types: [{ description: 'Файл расчёта', accept: { 'application/vnd.ms-excel': ['.xls'], 'application/rtf': ['.rtf'] } }]
+            });
+            const w = await handle.createWritable();
+            await w.write(blob);
+            await w.close();
+            return true;
+        } catch (e) {
+            if (e && e.name === 'AbortError') return true;
+        }
+    }
+    downloadBlob(blob, suggestedName);
+    return false;
+}
+
+function reportBlob(ext) {
+    if (ext === 'xls') {
+        const html = buildReportHTML();
+        return new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel' });
+    }
+    if (ext === 'rtf') {
+        return new Blob([buildRTF()], { type: 'application/rtf' });
+    }
+    return null;
+}
+
+function saveReport() {
+    const ok = (document.getElementById('resultsSection').style.display !== 'none');
+    const r = doCalc(zchData, parseFloat(document.getElementById('paramN').value) || 0, parseFloat(document.getElementById('paramEps').value) || 1e-4);
+    const blob = reportBlob('xls');
+    saveWithDialog(blob, 'Расчет_KG_ЗИП-Г.xls');
+    if (ok) alert('Расчёт сохранён в файл Расчёт_KG_ЗИП-Г.xls. Файл открывается в Microsoft Excel.');
+}
+
+function openPrintModal() {
+    document.getElementById('printOverlay').classList.add('show');
+    updatePrintNote();
+}
+
+function closePrintModal() {
+    document.getElementById('printOverlay').classList.remove('show');
+}
+
+function updatePrintNote() {
+    const v = document.querySelector('input[name="fmt"]:checked').value;
+    const note = document.getElementById('printNote');
+    if (v === 'pdf') note.innerHTML = 'Откроется стандартный диалог печати браузера: выберите принтер (в том числе «Microsoft Print to PDF» / «Сохранить как PDF») и нажмите «Печать».';
+    if (v === 'xls') note.innerHTML = 'Будет сформирован файл .xls с полным расчётом и сохранён в выбранную папку. Браузер не может напрямую печатать .xls — откройте файл в Microsoft Excel и нажмите «Печать».';
+    if (v === 'rtf') note.innerHTML = 'Будет сформирован файл .rtf с полным расчётом и сохранён в выбранную папку. Браузер не может напрямую печатать .rtf — откройте файл в Microsoft Word и нажмите «Печать».';
+}
+
+function doPrint() {
+    const v = document.querySelector('input[name="fmt"]:checked').value;
+    closePrintModal();
+    if (v === 'pdf') {
+        window.print();
+    } else if (v === 'xls') {
+        saveWithDialog(reportBlob('xls'), 'Расчет_KG_ЗИП-Г.xls');
+        alert('Файл Расчёт_KG_ЗИП-Г.xls сохранён. Откройте его в Microsoft Excel и отправьте на печать.');
+    } else if (v === 'rtf') {
+        saveWithDialog(reportBlob('rtf'), 'Расчет_KG_ЗИП-Г.rtf');
+        alert('Файл Расчёт_KG_ЗИП-Г.rtf сохранён. Откройте его в Microsoft Word и отправьте на печать.');
+    }
+}
+
+document.querySelectorAll('input[name="fmt"]').forEach(r => r.addEventListener('change', updatePrintNote));
+
+// Инициализация
+zchData = getDefaultData();
+renderTable();
+updateStratNote();
+</script>
+</body>
+</html>
