@@ -1,2 +1,2 @@
-# GOST27.507-2015_github.io
+# maxtraid123-tech.github.io
 My first repository on GitHub
