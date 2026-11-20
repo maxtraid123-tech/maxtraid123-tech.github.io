@@ -1,6 +1,3 @@
-# maxtraid123-tech.github.io
-My first repository on GitHub
-https://github.com/maxtraid123-tech/GOST27.507-2015_github.io.git
 <!DOCTYPE html>
 <html lang="ru">
 <head>
